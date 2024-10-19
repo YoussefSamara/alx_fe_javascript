@@ -37,6 +37,37 @@ async function fetchQuotesFromServer() {
 // Periodically check for updates from the server
 setInterval(fetchQuotesFromServer, 30000); // Check every 30 seconds
 
+// Sync quotes between local storage and the server
+async function syncQuotes() {
+  try {
+    // Get current local quotes
+    const localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+
+    // Fetch quotes from the server
+    const response = await fetch(serverUrl);
+    const serverQuotes = await response.json();
+
+    // Check for discrepancies and resolve them
+    serverQuotes.forEach(serverQuote => {
+      const localQuoteIndex = localQuotes.findIndex(q => q.id === serverQuote.id);
+      if (localQuoteIndex > -1) {
+        // Update local quote if necessary
+        localQuotes[localQuoteIndex] = serverQuote;
+      } else {
+        // Add new server quote if it doesn't exist locally
+        localQuotes.push(serverQuote);
+      }
+    });
+
+    // Save the synchronized quotes back to local storage
+    localStorage.setItem('quotes', JSON.stringify(localQuotes));
+    quotes = localQuotes; // Update the quotes variable
+    alert('Quotes synchronized successfully!');
+  } catch (error) {
+    console.error('Error syncing quotes:', error);
+  }
+}
+
 // Send quotes to the server
 async function sendQuotesToServer() {
   try {
