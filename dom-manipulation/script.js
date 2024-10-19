@@ -62,7 +62,7 @@ async function syncQuotes() {
     // Save the synchronized quotes back to local storage
     localStorage.setItem('quotes', JSON.stringify(localQuotes));
     quotes = localQuotes; // Update the quotes variable
-    alert('Quotes synchronized successfully!');
+    alert('Quotes synced with server!'); // Message indicating successful sync
   } catch (error) {
     console.error('Error syncing quotes:', error);
   }
