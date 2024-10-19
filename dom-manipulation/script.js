@@ -1,14 +1,41 @@
-// Array of quotes (Loaded from local storage if available)
-let quotes = JSON.parse(localStorage.getItem('quotes')) || [
-  { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
-  { text: "Life is 10% what happens to us and 90% how we react to it.", category: "Inspiration" },
-  { text: "Good things come to people who wait, but better things come to those who go out and get them.", category: "Success" }
-];
+let quotes = JSON.parse(localStorage.getItem('quotes')) || [];
+
+// Simulated server URL
+const serverUrl = 'https://jsonplaceholder.typicode.com/posts';
 
 // Save quotes to local storage
 function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
 }
+
+// Fetch quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(serverUrl);
+    const serverQuotes = await response.json();
+
+    // Simulate conflict resolution: server data takes precedence
+    serverQuotes.forEach(serverQuote => {
+      const existingQuoteIndex = quotes.findIndex(q => q.id === serverQuote.id);
+      if (existingQuoteIndex > -1) {
+        // Update existing quote if conflict
+        quotes[existingQuoteIndex] = serverQuote;
+      } else {
+        // Add new quote if it doesn't exist
+        quotes.push(serverQuote);
+      }
+    });
+
+    // Save updated quotes to local storage
+    saveQuotes();
+    alert('Quotes updated from server successfully!');
+  } catch (error) {
+    console.error('Error fetching quotes from server:', error);
+  }
+}
+
+// Periodically check for updates from the server
+setInterval(fetchQuotesFromServer, 30000); // Check every 30 seconds
 
 // Populate category filter dropdown
 function populateCategories() {
@@ -105,9 +132,12 @@ function createAddQuoteForm() {
 function addQuote() {
   const quoteText = document.getElementById('newQuoteText').value.trim();
   const quoteCategory = document.getElementById('newQuoteCategory').value.trim();
+  
+  // Generate a new ID for the quote
+  const newId = quotes.length > 0 ? Math.max(quotes.map(q => q.id)) + 1 : 1;
 
   if (quoteText && quoteCategory) {
-    quotes.push({ text: quoteText, category: quoteCategory });
+    quotes.push({ id: newId, text: quoteText, category: quoteCategory });
     saveQuotes(); // Save to local storage
     populateCategories(); // Update category list
     alert('New quote added!');
