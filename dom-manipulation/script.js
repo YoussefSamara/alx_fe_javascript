@@ -37,6 +37,27 @@ async function fetchQuotesFromServer() {
 // Periodically check for updates from the server
 setInterval(fetchQuotesFromServer, 30000); // Check every 30 seconds
 
+// Send quotes to the server
+async function sendQuotesToServer() {
+  try {
+    const response = await fetch(serverUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(quotes),
+    });
+
+    if (response.ok) {
+      alert('Quotes sent to the server successfully!');
+    } else {
+      alert('Failed to send quotes to the server.');
+    }
+  } catch (error) {
+    console.error('Error sending quotes to server:', error);
+  }
+}
+
 // Populate category filter dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById('categoryFilter');
@@ -139,6 +160,7 @@ function addQuote() {
   if (quoteText && quoteCategory) {
     quotes.push({ id: newId, text: quoteText, category: quoteCategory });
     saveQuotes(); // Save to local storage
+    sendQuotesToServer(); // Send updated quotes to server
     populateCategories(); // Update category list
     alert('New quote added!');
   } else {
